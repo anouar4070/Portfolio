@@ -1,0 +1,15 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "Client Application for Blogging Project",
+  "scripts": {
+    "start": "node index"
+  },
+  "keywords": [],
+  "author": "Basar Buyukkahraman",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2",
+    "http-proxy-middleware": "^3.0.0"
+  }
+}
