@@ -1,7 +1,11 @@
-import { BadGatewayException, BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadGatewayException,
+  BadRequestException,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { CreateUser } from './dto/create-user.dto';
 import { EmailService } from '../email/email.service';
 import { generateUniqueValue } from '../shared';
@@ -11,6 +15,7 @@ export class UserService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
     private emailService: EmailService,
+    private dataSource: DataSource,
   ) {}
 
   async createUser(body: CreateUser): Promise<void> {
@@ -27,20 +32,25 @@ export class UserService {
     }
 
     user.registrationToken = generateUniqueValue();
-    // await this.userRepository.save(user);
-    // await this.emailService.sendSignUpEmail(user.email, user.registrationToken);
+
+    const queryRunner = this.dataSource.createQueryRunner();
+
     try {
-      await this.userRepository.save(user);
+      //await this.userRepository.save(user);
+      await queryRunner.startTransaction();
+      await queryRunner.manager.save(user);
       await this.emailService.sendSignUpEmail(
         user.email,
         user.registrationToken,
       );
+      await queryRunner.commitTransaction();
     } catch (exception: any) {
       if (exception.message.includes('UNIQUE constraint')) {
         throw new BadRequestException('Invalid request', {
           cause: [{ property: 'email', constraints: ['Email is in use'] }],
         });
       }
+      await queryRunner.rollbackTransaction();
       throw new BadGatewayException('Server error');
     }
   }
