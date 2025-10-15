@@ -1,19 +1,21 @@
 import { Module } from '@nestjs/common';
-import { UserController } from './user/user.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './user/user.entity';
+import { UserModule } from './user/user.module';
+import { EmailModule } from './email/email.module';
+import { ConfigModule } from '@nestjs/config';
+import { DatabaseModuleOptions } from './config/database.configuration';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'sqlite',
-      database: './app-db.sqlite',
-      synchronize: true,
-      entities: [User],
+    TypeOrmModule.forRootAsync(DatabaseModuleOptions),
+    UserModule,
+    EmailModule,
+    ConfigModule.forRoot({
+      envFilePath: process.env.NODE_ENV === 'development' ? '.dev.env' : '.env',
+      isGlobal: true,
     }),
-    TypeOrmModule.forFeature([User]),
   ],
-  controllers: [UserController],
+  controllers: [],
   providers: [],
 })
 export class AppModule {}
