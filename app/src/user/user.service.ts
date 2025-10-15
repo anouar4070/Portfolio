@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadGatewayException, BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Repository } from 'typeorm';
@@ -41,6 +41,7 @@ export class UserService {
           cause: [{ property: 'email', constraints: ['Email is in use'] }],
         });
       }
+      throw new BadGatewayException('Server error');
     }
   }
 }
