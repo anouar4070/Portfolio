@@ -8,7 +8,7 @@ import { User } from './user.entity';
 import { Repository, DataSource } from 'typeorm';
 import { CreateUser } from './dto/create-user.dto';
 import { EmailService } from '../email/email.service';
-import { generateUniqueValue } from '../shared';
+import { generateUniqueValue, Operation } from '../shared';
 
 @Injectable()
 export class UserService {
@@ -53,5 +53,18 @@ export class UserService {
       await queryRunner.rollbackTransaction();
       throw new BadGatewayException('Server error');
     }
+  }
+
+  async validateToken(operation: Operation, token: string): Promise<User> {
+    const user = await this.userRepository.findOneBy({
+      registrationToken: token,
+    });
+    if (!user) {
+      throw new BadRequestException('Invalid token');
+    }
+
+    user.registrationToken = null;
+    this.userRepository.save(user);
+    return user;
   }
 }

@@ -17,8 +17,8 @@ export class User {
   @Column({ nullable: true })
   image: string;
 
-  @Column({ nullable: true })
-  registrationToken: string;
+  @Column({ type: 'text', nullable: true })
+  registrationToken: string | null;
 
   @Column({ nullable: true })
   loginToken: string;
