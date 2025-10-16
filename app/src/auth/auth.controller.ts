@@ -4,11 +4,12 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Req,
   Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthRequest } from './dto/auth-request.dto';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 import { AuthUser } from './dto/auth-user.dto';
 
 const ONE_YEAR_IN_MILLIS = 365 * 24 * 60 * 1000;
@@ -29,5 +30,15 @@ export class AuthController {
       httpOnly: true,
     });
     return result.user;
+  }
+
+  @Post('/logout')
+  @HttpCode(HttpStatus.OK)
+  async logout(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
+    await this.authService.deleteToken(request.cookies['app-token']);
+    response.clearCookie('app-token');
   }
 }
