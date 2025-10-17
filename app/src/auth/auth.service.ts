@@ -7,6 +7,7 @@ import { Token } from './token.entity';
 import { Repository } from 'typeorm';
 import { generateUniqueValue } from '../shared';
 import { LoginUser } from './dto/login-user.dto';
+import { User } from '../user/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -45,5 +46,14 @@ export class AuthService {
 
   async handleLogin(request: LoginUser): Promise<void> {
     await this.userService.generateLoginToken(request.email);
+  }
+
+  async getUserFromToken(token: string): Promise<User | undefined> {
+    const tokenInDB = await this.tokenRepository.findOne({
+      where: { token },
+      relations: ['user'], //tells TypeORM to automatically load the related user entity when fetching the token
+    });
+    if (!tokenInDB) return undefined;
+    return tokenInDB.user;
   }
 }
