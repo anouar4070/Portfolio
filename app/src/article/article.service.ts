@@ -70,11 +70,15 @@ export class ArticleService {
     return articleInDB;
   }
 
-  async getArticles({ size, page }: Pagination) {
+  async getArticles({ size, page, sort, direction }: Pagination) {
     const skip = page * size;
     const [content, count] = await this.articleRepository.findAndCount({
+      where: {
+        published: true,
+      },
       skip,
       take: size,
+      order: this.getOrder(sort, direction),
     });
     return {
       content,
@@ -82,5 +86,12 @@ export class ArticleService {
       size,
       total: Math.ceil(count / size),
     };
+  }
+
+  private getOrder(sort: string, direction: string) {
+    if (['id', 'published_at'].indexOf(sort) > -1) {
+      return { [sort]: direction };
+    }
+    return {};
   }
 }
