@@ -39,7 +39,7 @@ export class Article {
   })
   updated_at: Date;
 
-  @Column({ nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   published_at: Date | null;
 
   @ManyToOne(() => User, (user) => user.articles)
