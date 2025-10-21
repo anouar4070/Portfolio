@@ -97,7 +97,10 @@ export class ArticleService {
     return {};
   }
 
-  async getArticleByIdOrSlug(idOrSlug: string): Promise<ArticleWithContent> {
+  async getArticleByIdOrSlug(
+    idOrSlug: string,
+    user: User,
+  ): Promise<ArticleWithContent> {
     const findOneOptions: FindOneOptions<Article> = { relations: ['user'] };
     if (Number.isInteger(Number(idOrSlug))) {
       findOneOptions.where = {
@@ -113,6 +116,12 @@ export class ArticleService {
     if (!article) {
       throw new NotFoundException();
     }
+
+    if (!article.published) {
+    if (!user) throw new NotFoundException();
+      if (article.user.id !== user.id) throw new NotFoundException();
+    }
+
     return new ArticleWithContent(article);
   }
 }
