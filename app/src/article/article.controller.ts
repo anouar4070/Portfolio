@@ -19,11 +19,11 @@ import { ArticleWithContent } from './dto/article-response.dto';
 //import { Page } from '../shared/pagination/pagination.decorator';
 //import { Pagination } from '../shared';
 
-@Controller('articles')
+@Controller()
 export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}
 
-  @Post()
+  @Post('articles')
   @UseGuards(AuthGuard)
   async createArticle(
     @Body() body: ArticleRequest,
@@ -32,7 +32,7 @@ export class ArticleController {
     return this.articleService.save(body, user);
   }
 
-  @Put('/:id')
+  @Put('articles/:id')
   @UseGuards(AuthGuard)
   async updateArticle(
     @Body() body: ArticleRequest,
@@ -42,7 +42,7 @@ export class ArticleController {
     return this.articleService.update(id, body, user);
   }
 
-  @Patch('/:id/publish')
+  @Patch('articles/:id/publish')
   @UseGuards(AuthGuard)
   async publishArticle(
     @CurrentUser() user: User,
@@ -51,16 +51,25 @@ export class ArticleController {
     return this.articleService.publish(id, user);
   }
 
-  @Get()
+  @Get('articles')
   async getArticles(@Page() page: Pagination) {
     return this.articleService.getArticles(page);
   }
 
-  @Get('/:idOrSlug')
+  @Get('articles/:idOrSlug')
   async getArticleByIdOrSlug(
     @Param('idOrSlug') idOrSlug: string,
     @CurrentUser() user: User,
   ): Promise<ArticleWithContent> {
     return this.articleService.getArticleByIdOrSlug(idOrSlug, user);
+  }
+
+  @Get('users/:idOrHandle/articles')
+  async getArticlesOfUser(
+    @Page() page: Pagination,
+    @Param('idOrHandle') idOrHandle: string,
+    @CurrentUser() user: User,
+  ) {
+    return this.articleService.getArticlesOfUser(page, idOrHandle, user);
   }
 }
